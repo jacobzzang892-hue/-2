@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#12A08A">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -169,6 +169,14 @@ button.primary:hover{background:var(--shade);border-color:var(--shade)}
 .fbact a{color:var(--shade-deep);font-size:13px}
 .msg{font-size:12.5px;color:var(--muted)}
 .msg.err{color:var(--danger)}
+.goweb{background:linear-gradient(120deg,var(--shade-soft),var(--surface) 70%);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;gap:18px;align-items:center;box-shadow:var(--lift)}
+.goweb .qr{flex:none;width:112px;height:112px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px}
+.goweb .qr svg{display:block;width:100%;height:100%}
+.goweb .gw{display:grid;gap:6px;min-width:0}
+.goweb h2{font-size:16px;margin:0}
+.goweb p{margin:0;font-size:13px;color:var(--muted)}
+.goweb .url{font-family:var(--mono);font-size:12.5px;color:var(--shade-deep);overflow-wrap:anywhere}
+.goweb .row{gap:8px;flex-wrap:wrap}
 svg text{font-family:var(--font)}
 /* 휴대폰: 출발·도착 → 결과 카드 → 접힌 설정 → 지하철 안내 → 약도·지도 → 안내 순서 */
 @media (max-width:900px){
@@ -177,7 +185,8 @@ svg text{font-family:var(--font)}
   .grid>*,.panel>*,.results>*{width:100%;min-width:0}
   details.sec:not([open]){gap:0}
   .panel>section,.panel>details{width:100%;align-self:stretch;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--lift)}
-  .sec-od{order:1}.o-cmp{order:2}.panel>details{order:3;padding-block:12px}.transit{order:4}.viewbox{order:5}.steps{order:6}.alert{order:7}.fb{order:8}
+  .sec-od{order:1}.o-cmp{order:2}.panel>details{order:3;padding-block:12px}.transit{order:4}.viewbox{order:5}.steps{order:6}.alert{order:7}.fb{order:8}.goweb{order:9}
+  .goweb{align-items:flex-start}.goweb .qr{width:96px;height:96px}
   details.sec:not([open]) .secb{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -339,6 +348,21 @@ svg text{font-family:var(--font)}
           </div>
           <p class="msg" id="fbMsg" role="status"></p>
         </form>
+      </section>
+
+      <section class="goweb" id="goWeb" aria-labelledby="gwTitle" hidden>
+        <div class="qr" aria-hidden="true"><svg viewBox="0 0 29 29" shape-rendering="crispEdges"><path d="M0,0h1v1h-1zM1,0h1v1h-1zM2,0h1v1h-1zM3,0h1v1h-1zM4,0h1v1h-1zM5,0h1v1h-1zM6,0h1v1h-1zM11,0h1v1h-1zM12,0h1v1h-1zM13,0h1v1h-1zM14,0h1v1h-1zM15,0h1v1h-1zM16,0h1v1h-1zM17,0h1v1h-1zM18,0h1v1h-1zM19,0h1v1h-1zM22,0h1v1h-1zM23,0h1v1h-1zM24,0h1v1h-1zM25,0h1v1h-1zM26,0h1v1h-1zM27,0h1v1h-1zM28,0h1v1h-1zM0,1h1v1h-1zM6,1h1v1h-1zM8,1h1v1h-1zM9,1h1v1h-1zM12,1h1v1h-1zM13,1h1v1h-1zM14,1h1v1h-1zM15,1h1v1h-1zM16,1h1v1h-1zM17,1h1v1h-1zM19,1h1v1h-1zM20,1h1v1h-1zM22,1h1v1h-1zM28,1h1v1h-1zM0,2h1v1h-1zM2,2h1v1h-1zM3,2h1v1h-1zM4,2h1v1h-1zM6,2h1v1h-1zM9,2h1v1h-1zM10,2h1v1h-1zM11,2h1v1h-1zM15,2h1v1h-1zM18,2h1v1h-1zM22,2h1v1h-1zM24,2h1v1h-1zM25,2h1v1h-1zM26,2h1v1h-1zM28,2h1v1h-1zM0,3h1v1h-1zM2,3h1v1h-1zM3,3h1v1h-1zM4,3h1v1h-1zM6,3h1v1h-1zM9,3h1v1h-1zM11,3h1v1h-1zM12,3h1v1h-1zM18,3h1v1h-1zM22,3h1v1h-1zM24,3h1v1h-1zM25,3h1v1h-1zM26,3h1v1h-1zM28,3h1v1h-1zM0,4h1v1h-1zM2,4h1v1h-1zM3,4h1v1h-1zM4,4h1v1h-1zM6,4h1v1h-1zM8,4h1v1h-1zM9,4h1v1h-1zM12,4h1v1h-1zM15,4h1v1h-1zM16,4h1v1h-1zM19,4h1v1h-1zM20,4h1v1h-1zM22,4h1v1h-1zM24,4h1v1h-1zM25,4h1v1h-1zM26,4h1v1h-1zM28,4h1v1h-1zM0,5h1v1h-1zM6,5h1v1h-1zM9,5h1v1h-1zM12,5h1v1h-1zM15,5h1v1h-1zM16,5h1v1h-1zM17,5h1v1h-1zM18,5h1v1h-1zM19,5h1v1h-1zM22,5h1v1h-1zM28,5h1v1h-1zM0,6h1v1h-1zM1,6h1v1h-1zM2,6h1v1h-1zM3,6h1v1h-1zM4,6h1v1h-1zM5,6h1v1h-1zM6,6h1v1h-1zM8,6h1v1h-1zM10,6h1v1h-1zM12,6h1v1h-1zM14,6h1v1h-1zM16,6h1v1h-1zM18,6h1v1h-1zM20,6h1v1h-1zM22,6h1v1h-1zM23,6h1v1h-1zM24,6h1v1h-1zM25,6h1v1h-1zM26,6h1v1h-1zM27,6h1v1h-1zM28,6h1v1h-1zM10,7h1v1h-1zM11,7h1v1h-1zM13,7h1v1h-1zM16,7h1v1h-1zM17,7h1v1h-1zM18,7h1v1h-1zM0,8h1v1h-1zM2,8h1v1h-1zM4,8h1v1h-1zM6,8h1v1h-1zM9,8h1v1h-1zM11,8h1v1h-1zM12,8h1v1h-1zM13,8h1v1h-1zM14,8h1v1h-1zM15,8h1v1h-1zM16,8h1v1h-1zM17,8h1v1h-1zM24,8h1v1h-1zM27,8h1v1h-1zM2,9h1v1h-1zM3,9h1v1h-1zM5,9h1v1h-1zM10,9h1v1h-1zM11,9h1v1h-1zM16,9h1v1h-1zM17,9h1v1h-1zM21,9h1v1h-1zM22,9h1v1h-1zM25,9h1v1h-1zM28,9h1v1h-1zM0,10h1v1h-1zM2,10h1v1h-1zM3,10h1v1h-1zM4,10h1v1h-1zM6,10h1v1h-1zM8,10h1v1h-1zM10,10h1v1h-1zM12,10h1v1h-1zM13,10h1v1h-1zM22,10h1v1h-1zM23,10h1v1h-1zM26,10h1v1h-1zM27,10h1v1h-1zM28,10h1v1h-1zM0,11h1v1h-1zM1,11h1v1h-1zM2,11h1v1h-1zM3,11h1v1h-1zM4,11h1v1h-1zM5,11h1v1h-1zM8,11h1v1h-1zM10,11h1v1h-1zM12,11h1v1h-1zM13,11h1v1h-1zM14,11h1v1h-1zM15,11h1v1h-1zM17,11h1v1h-1zM18,11h1v1h-1zM19,11h1v1h-1zM21,11h1v1h-1zM22,11h1v1h-1zM24,11h1v1h-1zM27,11h1v1h-1zM0,12h1v1h-1zM3,12h1v1h-1zM4,12h1v1h-1zM6,12h1v1h-1zM7,12h1v1h-1zM10,12h1v1h-1zM11,12h1v1h-1zM14,12h1v1h-1zM15,12h1v1h-1zM16,12h1v1h-1zM17,12h1v1h-1zM18,12h1v1h-1zM19,12h1v1h-1zM21,12h1v1h-1zM22,12h1v1h-1zM25,12h1v1h-1zM27,12h1v1h-1zM28,12h1v1h-1zM0,13h1v1h-1zM1,13h1v1h-1zM3,13h1v1h-1zM4,13h1v1h-1zM16,13h1v1h-1zM22,13h1v1h-1zM25,13h1v1h-1zM28,13h1v1h-1zM1,14h1v1h-1zM2,14h1v1h-1zM6,14h1v1h-1zM10,14h1v1h-1zM11,14h1v1h-1zM12,14h1v1h-1zM13,14h1v1h-1zM16,14h1v1h-1zM17,14h1v1h-1zM20,14h1v1h-1zM23,14h1v1h-1zM25,14h1v1h-1zM27,14h1v1h-1zM28,14h1v1h-1zM3,15h1v1h-1zM10,15h1v1h-1zM16,15h1v1h-1zM17,15h1v1h-1zM19,15h1v1h-1zM21,15h1v1h-1zM22,15h1v1h-1zM23,15h1v1h-1zM25,15h1v1h-1zM27,15h1v1h-1zM0,16h1v1h-1zM4,16h1v1h-1zM6,16h1v1h-1zM8,16h1v1h-1zM15,16h1v1h-1zM16,16h1v1h-1zM17,16h1v1h-1zM19,16h1v1h-1zM21,16h1v1h-1zM22,16h1v1h-1zM25,16h1v1h-1zM27,16h1v1h-1zM28,16h1v1h-1zM3,17h1v1h-1zM4,17h1v1h-1zM8,17h1v1h-1zM9,17h1v1h-1zM10,17h1v1h-1zM13,17h1v1h-1zM17,17h1v1h-1zM22,17h1v1h-1zM25,17h1v1h-1zM26,17h1v1h-1zM28,17h1v1h-1zM0,18h1v1h-1zM2,18h1v1h-1zM3,18h1v1h-1zM4,18h1v1h-1zM5,18h1v1h-1zM6,18h1v1h-1zM8,18h1v1h-1zM9,18h1v1h-1zM10,18h1v1h-1zM11,18h1v1h-1zM14,18h1v1h-1zM16,18h1v1h-1zM17,18h1v1h-1zM23,18h1v1h-1zM24,18h1v1h-1zM27,18h1v1h-1zM28,18h1v1h-1zM1,19h1v1h-1zM8,19h1v1h-1zM10,19h1v1h-1zM11,19h1v1h-1zM12,19h1v1h-1zM13,19h1v1h-1zM14,19h1v1h-1zM17,19h1v1h-1zM18,19h1v1h-1zM20,19h1v1h-1zM21,19h1v1h-1zM22,19h1v1h-1zM23,19h1v1h-1zM25,19h1v1h-1zM27,19h1v1h-1zM0,20h1v1h-1zM3,20h1v1h-1zM6,20h1v1h-1zM7,20h1v1h-1zM8,20h1v1h-1zM14,20h1v1h-1zM16,20h1v1h-1zM17,20h1v1h-1zM20,20h1v1h-1zM21,20h1v1h-1zM22,20h1v1h-1zM23,20h1v1h-1zM24,20h1v1h-1zM8,21h1v1h-1zM10,21h1v1h-1zM11,21h1v1h-1zM14,21h1v1h-1zM16,21h1v1h-1zM19,21h1v1h-1zM20,21h1v1h-1zM24,21h1v1h-1zM26,21h1v1h-1zM27,21h1v1h-1zM28,21h1v1h-1zM0,22h1v1h-1zM1,22h1v1h-1zM2,22h1v1h-1zM3,22h1v1h-1zM4,22h1v1h-1zM5,22h1v1h-1zM6,22h1v1h-1zM11,22h1v1h-1zM13,22h1v1h-1zM18,22h1v1h-1zM19,22h1v1h-1zM20,22h1v1h-1zM22,22h1v1h-1zM24,22h1v1h-1zM25,22h1v1h-1zM27,22h1v1h-1zM28,22h1v1h-1zM0,23h1v1h-1zM6,23h1v1h-1zM10,23h1v1h-1zM15,23h1v1h-1zM16,23h1v1h-1zM17,23h1v1h-1zM18,23h1v1h-1zM20,23h1v1h-1zM24,23h1v1h-1zM25,23h1v1h-1zM28,23h1v1h-1zM0,24h1v1h-1zM2,24h1v1h-1zM3,24h1v1h-1zM4,24h1v1h-1zM6,24h1v1h-1zM8,24h1v1h-1zM9,24h1v1h-1zM10,24h1v1h-1zM11,24h1v1h-1zM17,24h1v1h-1zM20,24h1v1h-1zM21,24h1v1h-1zM22,24h1v1h-1zM23,24h1v1h-1zM24,24h1v1h-1zM27,24h1v1h-1zM28,24h1v1h-1zM0,25h1v1h-1zM2,25h1v1h-1zM3,25h1v1h-1zM4,25h1v1h-1zM6,25h1v1h-1zM9,25h1v1h-1zM10,25h1v1h-1zM12,25h1v1h-1zM16,25h1v1h-1zM17,25h1v1h-1zM18,25h1v1h-1zM19,25h1v1h-1zM20,25h1v1h-1zM23,25h1v1h-1zM24,25h1v1h-1zM26,25h1v1h-1zM27,25h1v1h-1zM28,25h1v1h-1zM0,26h1v1h-1zM2,26h1v1h-1zM3,26h1v1h-1zM4,26h1v1h-1zM6,26h1v1h-1zM8,26h1v1h-1zM10,26h1v1h-1zM11,26h1v1h-1zM13,26h1v1h-1zM16,26h1v1h-1zM19,26h1v1h-1zM23,26h1v1h-1zM24,26h1v1h-1zM25,26h1v1h-1zM28,26h1v1h-1zM0,27h1v1h-1zM6,27h1v1h-1zM9,27h1v1h-1zM11,27h1v1h-1zM12,27h1v1h-1zM13,27h1v1h-1zM15,27h1v1h-1zM17,27h1v1h-1zM19,27h1v1h-1zM20,27h1v1h-1zM21,27h1v1h-1zM23,27h1v1h-1zM24,27h1v1h-1zM27,27h1v1h-1zM0,28h1v1h-1zM1,28h1v1h-1zM2,28h1v1h-1zM3,28h1v1h-1zM4,28h1v1h-1zM5,28h1v1h-1zM6,28h1v1h-1zM8,28h1v1h-1zM9,28h1v1h-1zM14,28h1v1h-1zM15,28h1v1h-1zM16,28h1v1h-1zM17,28h1v1h-1zM19,28h1v1h-1zM20,28h1v1h-1zM21,28h1v1h-1zM22,28h1v1h-1zM27,28h1v1h-1zM28,28h1v1h-1z" fill="#1D3446"/></svg></div>
+        <div class="gw">
+          <h2 id="gwTitle">휴대폰에서 앱처럼 쓰기</h2>
+          <p id="gwText"></p>
+          <a class="url" id="gwUrl" target="_blank" rel="noopener"></a>
+          <div class="row">
+            <button type="button" id="gwInstall" class="primary" hidden>앱으로 설치</button>
+            <button type="button" id="gwCopy">주소 복사</button>
+            <button type="button" id="gwShare" hidden>공유</button>
+          </div>
+          <p class="msg" id="gwMsg" role="status"></p>
+        </div>
       </section>
     </div>
   </div>
@@ -1321,11 +1345,41 @@ $('btnWx').onclick = async () => {
   });
 })();
 
+// ---------- 웹 주소 안내 · 앱 설치 · 주소 공유 ----------
+const WEB_URL = 'https://jacobzzang892-hue.github.io/-2/';
+let installEvt = null;
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; $('gwInstall').hidden = false; });
+(() => {
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (standalone) return;                       // 이미 앱으로 설치해 연 경우에는 안내하지 않음
+  const onWeb = location.href.startsWith(WEB_URL);
+  const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  $('gwText').textContent = onWeb
+    ? (ios ? 'Safari 아래쪽 공유 버튼 → "홈 화면에 추가"를 누르면 앱처럼 열립니다. 친구 휴대폰에는 QR을 찍게 하세요.'
+           : '설치 버튼이 보이면 눌러 앱으로 설치하세요. 안 보이면 브라우저 메뉴의 "앱 설치" 또는 "홈 화면에 추가"를 쓰면 됩니다.')
+    : '이 파일은 인터넷 없이도 길찾기가 되지만, 앱 설치는 웹 주소에서만 됩니다. 컴퓨터 화면이면 휴대폰 카메라로 QR을 찍고, 휴대폰이면 아래 주소를 눌러 연 뒤 "홈 화면에 추가"를 누르세요.';
+  const a = $('gwUrl'); a.href = WEB_URL; a.textContent = WEB_URL;
+  if (navigator.share && window.isSecureContext) $('gwShare').hidden = false;
+  $('goWeb').hidden = false;
+})();
+$('gwInstall').onclick = async () => {
+  if (!installEvt) return;
+  installEvt.prompt(); const r = await installEvt.userChoice; installEvt = null; $('gwInstall').hidden = true;
+  $('gwMsg').textContent = r.outcome === 'accepted' ? '설치했습니다. 홈 화면이나 앱 목록에서 열 수 있습니다.' : '설치를 취소했습니다.';
+};
+$('gwCopy').onclick = async () => {
+  const msg = $('gwMsg');
+  try { await navigator.clipboard.writeText(WEB_URL); msg.textContent = '주소를 복사했습니다.'; }
+  catch { const t = document.createElement('textarea'); t.value = WEB_URL; document.body.append(t); t.select();
+    const ok = document.execCommand('copy'); t.remove(); msg.textContent = ok ? '주소를 복사했습니다.' : '복사하지 못했습니다. 위 주소를 길게 눌러 복사하세요.'; }
+};
+$('gwShare').onclick = () => navigator.share({ title: document.title, url: WEB_URL }).catch(() => {});
+
 // ---------- 내 위치 (휴대폰 GPS) ----------
 $('btnMe').onclick = () => {
   const msg = $('meMsg'), btn = $('btnMe');
   const say = (t, err) => { msg.hidden = false; msg.className = err ? 'msg err' : 'msg'; msg.textContent = t; };
-  if (!navigator.geolocation || location.protocol === 'file:') { say('내 위치는 웹 주소(https)로 연 사이트에서만 쓸 수 있습니다.', true); return; }
+  if (!navigator.geolocation || !window.isSecureContext) { say(`이 브라우저에서는 위치를 쓸 수 없습니다. 웹 주소(${WEB_URL})로 열어 주세요.`, true); return; }
   btn.setAttribute('aria-busy', 'true'); say('위치를 확인하는 중…');
   navigator.geolocation.getCurrentPosition((pos) => {
     btn.removeAttribute('aria-busy');
@@ -1337,7 +1391,10 @@ $('btnMe').onclick = () => {
     recompute(); if (state.view === 'map') requestAnimationFrame(fitRoute);
   }, (err) => {
     btn.removeAttribute('aria-busy');
-    say(err.code === 1 ? '위치 사용이 허용되지 않았습니다. 브라우저 설정에서 이 사이트의 위치 권한을 켜 주세요.' : '위치를 확인하지 못했습니다. 잠시 뒤 다시 눌러 주세요.', true);
+    const denied = location.protocol === 'file:'
+      ? `위치 사용이 허용되지 않았습니다. 파일로 연 페이지에는 위치를 주지 않는 브라우저도 있으니, 안 되면 웹 주소(${WEB_URL})로 열어 주세요.`
+      : '위치 사용이 허용되지 않았습니다. 브라우저 설정에서 이 사이트의 위치 권한을 켜 주세요.';
+    say(err.code === 1 ? denied : '위치를 확인하지 못했습니다. 잠시 뒤 다시 눌러 주세요.', true);
   }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 });
 };
 // 휴대폰에서는 설정 칸을 접어 두고, 접힌 제목 옆에 지금 값을 요약
