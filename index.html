@@ -23,7 +23,7 @@
   --bg:#F3F8FA; --surface:#FFFFFF; --ink:#1D3446; --muted:#5B6E7C; --line:#DCE7EC;
   --shade:#12A08A; --shade-deep:#0B7D6C; --shade-soft:#DDF4EE; --sun:#F27A1A; --sun-soft:#FFEBD6; --sunny:#FFC83D; --sky:#E2F1F9;
   --bld1:#E1E8EB; --bld2:#C8D3D8; --bld3:#A7B5BC; --green:#D6EECD; --water:#D6EAF5; --net:#C3D0D6;
-  --caution:#B98300; --road:#E6ECEF; --metro:#3B82D6; --park-ink:#3B8A37; --warn:#DB660C; --danger:#D2334A; --shadow-fill:#28486A;
+  --caution:#B98300; --road:#E6ECEF; --metro:#3B82D6; --park-ink:#3B8A37; --warn:#DB660C; --danger:#D2334A; --shadow-fill:#28486A; --tree:#3F8F2F;
   --font:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
   --display:"Do Hyeon","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
@@ -113,6 +113,14 @@ details.sec[open] .sumv{display:none}
 .stat .k{font-size:11px;color:var(--muted)} .stat .v{font-size:19px;font-weight:700}
 .bar{height:9px;border-radius:5px;background:var(--shade);overflow:hidden;display:flex}
 .bar i{display:block;height:100%;background:var(--sun)}
+.bar b{display:block;height:100%;background:var(--tree)}
+.treestat{margin:0;display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--ink);background:#EEF7E8;border:1px solid #D2E7C4;border-radius:12px;padding:8px 12px}
+.treestat svg{flex:none;width:16px;height:16px;margin-top:2px;color:var(--tree)}
+.treestat.wait{background:#F4F8FA;border-color:var(--line)}
+.treestat.err{background:#FFF4E5;border-color:#F6D9B0}
+.treestat.err svg{color:var(--warn)}
+.chk{display:flex;gap:6px;align-items:flex-start;font-size:13px;line-height:1.45}
+.chk input{accent-color:var(--tree);margin-top:3px}
 .cardnote{font-size:12px;color:var(--muted)}
 .transit{background:linear-gradient(120deg,#EAF3FD,var(--surface) 70%);border:1px solid #D3E3F6;border-radius:var(--r);padding:14px 18px;display:grid;gap:6px;box-shadow:var(--lift)}
 .transit h3{margin:0;font-size:15px;color:#2C64B0}
@@ -185,7 +193,7 @@ svg text{font-family:var(--font)}
   .grid>*,.panel>*,.results>*{width:100%;min-width:0}
   details.sec:not([open]){gap:0}
   .panel>section,.panel>details{width:100%;align-self:stretch;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--lift)}
-  .sec-od{order:1}.o-cmp{order:2}.panel>details{order:3;padding-block:12px}.transit{order:4}.viewbox{order:5}.steps{order:6}.alert{order:7}.fb{order:8}.goweb{order:9}
+  .sec-od{order:1}.o-cmp{order:2}.treestat{order:2}.panel>details{order:3;padding-block:12px}.transit{order:4}.viewbox{order:5}.steps{order:6}.alert{order:7}.fb{order:8}.goweb{order:9}
   .goweb{align-items:flex-start}.goweb .qr{width:96px;height:96px}
   details.sec:not([open]) .secb{display:none}
 }
@@ -199,7 +207,7 @@ svg text{font-family:var(--font)}
   <header class="top">
     <div class="tx">
       <h1>심해지는 폭염에 대비하는 <em>그늘 길찾기</em></h1>
-      <p class="sub">인천광역시 안에서 건물 그림자로 햇볕을 덜 받는 길을 찾습니다</p>
+      <p class="sub">인천광역시 안에서 건물 그림자와 AI가 찾은 나무 그늘로 햇볕을 덜 받는 길을 찾습니다</p>
       <p class="hint" id="dataStamp"></p>
     </div>
     <svg class="hero" viewBox="0 0 230 112" aria-hidden="true">
@@ -268,6 +276,7 @@ svg text{font-family:var(--font)}
         <input type="range" id="inAlpha" min="0" max="6" step="0.5" aria-label="그늘 우선 정도">
         <div class="row" style="justify-content:space-between;font-size:12px;color:var(--muted)"><span>빠른 길</span><span>그늘 우선</span></div>
         <p class="hint" id="alphaHint"></p>
+        <label class="chk"><input type="checkbox" id="inTree" checked><span>AI 나무 그늘 반영 <span class="opt">· 위성사진을 AI가 읽어 만든 나무 높이 지도에서 경로 주변만 받아 옵니다 (인터넷 필요)</span></span></label>
         </div>
       </details>
     </aside>
@@ -279,6 +288,7 @@ svg text{font-family:var(--font)}
           <div class="stats" id="statCool"></div>
           <div class="bar" id="barCool"><i></i></div>
           <div class="cardnote" id="noteCool"></div>
+          <div class="cardnote" id="shCool"></div>
           <div class="cardnote" id="sigCool"></div>
         </button>
         <button class="card" id="cardFast" aria-pressed="false">
@@ -286,9 +296,11 @@ svg text{font-family:var(--font)}
           <div class="stats" id="statFast"></div>
           <div class="bar" id="barFast"><i></i></div>
           <div class="cardnote" id="noteFast"></div>
+          <div class="cardnote" id="shFast"></div>
           <div class="cardnote" id="sigFast"></div>
         </button>
       </div>
+      <p class="treestat" id="treeStat" role="status" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.2 3.2 7.4h2.6L2.6 11.6h4.3V15h2.2v-3.4h4.3L10.2 7.4h2.6z" fill="currentColor"/></svg><span id="treeText"></span></p>
 
       <section class="transit" id="transit" hidden aria-live="polite"></section>
 
@@ -302,6 +314,7 @@ svg text{font-family:var(--font)}
             <button id="pickE" aria-pressed="false">도착 찍기</button>
             <label><input type="checkbox" id="chkTiles" checked>배경 지도</label>
             <label><input type="checkbox" id="chkShadow" checked>그림자</label>
+            <label><input type="checkbox" id="chkTree" checked>나무(AI)</label>
           </div>
         </div>
         <div id="paneSketch" role="tabpanel" aria-labelledby="tabSketch">
@@ -312,12 +325,13 @@ svg text{font-family:var(--font)}
             <svg id="map" role="img" aria-label="인천광역시 실제 축척 지도"><g id="gTiles"></g><path id="incMask" fill-rule="evenodd"></path><g id="gWorld"></g></svg>
             <div class="zoom"><button id="zIn" aria-label="확대">+</button><button id="zOut" aria-label="축소">−</button><button id="zFit" aria-label="경로에 맞추기" style="font-size:12px">⤢</button></div>
             <div class="maptip" id="mapTip" hidden></div>
-            <div class="attrib" id="attrib">지도 데이터 © OpenStreetMap 기여자</div>
+            <div class="attrib" id="attrib">지도 데이터 © OpenStreetMap 기여자 · 나무 높이 © Meta·WRI CHMv2 (CC BY 4.0)</div>
           </div>
         </div>
         <div class="legend">
           <span><i class="lg" style="background:var(--sun)"></i>햇볕 구간</span>
-          <span><i class="lg" style="background:var(--shade)"></i>그늘 구간</span>
+          <span><i class="lg" style="background:var(--shade)"></i>건물 그늘 구간</span>
+          <span><i class="lg" style="background:var(--tree)"></i>나무 그늘 구간(AI)</span>
           <span><i class="lg" style="background:var(--road);height:10px"></i>큰길</span>
           <span><svg width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><rect width="10" height="16" rx="3" fill="var(--ink)"/><circle cx="5" cy="4.5" r="2.3" fill="#E5484D"/><circle cx="5" cy="11.5" r="2.3" fill="#3DD68C"/></svg>신호등 횡단보도</span>
           <span><i class="lg" style="background:var(--muted);height:3px"></i>가장 빠른 길(실제 지도)</span>
@@ -483,20 +497,27 @@ const Engine = (() => {
   }
 
   // 필요한 간선만 그때그때 그늘 계산 (범위가 넓어도 경로 주변만 계산)
+  // 조각 값: 0 = 햇볕, 1 = 건물 그늘(또는 지붕 있는 길), 2 = 나무 그늘(건물 그늘이 아닌 곳만)
   function makeShader(G, D, idx) {
-    let sun = null, key = '';
+    let sun = null, key = '', sunKey = '', tree = null, treeVer = 0;
+    const mk = () => { key = sunKey + (tree ? '/t' + treeVer : ''); };
     function ensure(e) {
       if (e.sk === key) return;
       const [ax, ay] = D.nodes[e.a], [bx, by] = D.nodes[e.b];
-      const bits = new Uint8Array(e.n); let sh = 0;
+      const bits = new Uint8Array(e.n); let sh = 0, tr = 0;
       for (let i = 0; i < e.n; i++) {
-        const f = (i + 0.5) / e.n;
-        const s = e.cov ? 1 : (isShaded(ax + (bx - ax) * f, ay + (by - ay) * f, sun, D.blds, idx) ? 1 : 0);
-        bits[i] = s; sh += s;
+        const f = (i + 0.5) / e.n, px = ax + (bx - ax) * f, py = ay + (by - ay) * f;
+        let s = e.cov ? 1 : (isShaded(px, py, sun, D.blds, idx) ? 1 : 0);
+        if (!s && tree && sun.alt > 0 && tree(px, py, sun)) { s = 2; tr++; }
+        bits[i] = s; if (s) sh++;
       }
-      e.bits = bits; e.shade = sh / e.n; e.sk = key;
+      e.bits = bits; e.shade = sh / e.n; e.tshade = tr / e.n; e.sk = key;
     }
-    return { setSun(s) { sun = s; key = s.alt.toFixed(3) + '/' + s.az.toFixed(2); }, ensure, get key() { return key; } };
+    return {
+      setSun(s) { sun = s; sunKey = s.alt.toFixed(3) + '/' + s.az.toFixed(2); mk(); },
+      setTrees(fn) { tree = fn || null; treeVer++; mk(); },   // fn(x, y, sun) → 나무 그림자 안이면 true
+      ensure, get key() { return key; }
+    };
   }
 
   // --- 5. 가중 최단경로 (A* = 다익스트라 + 직선거리 하한, 이진 힙) ---
@@ -530,9 +551,9 @@ const Engine = (() => {
     const path = []; let v = reached;
     while (prev[v] !== -1) { const ei = prev[v], e = G.E[ei]; const u = e.a === v ? e.b : e.a; path.push({ ei, from: u, to: v }); v = u; }
     path.reverse();
-    let len = 0, sun = 0, major = 0, steps = 0, waitSun = 0, waitTot = 0; const sigSet = new Map();
+    let len = 0, sun = 0, tree = 0, major = 0, steps = 0, waitSun = 0, waitTot = 0; const sigSet = new Map();
     for (const p of path) {
-      const e = G.E[p.ei]; len += e.len; sun += e.len * (1 - e.shade);
+      const e = G.E[p.ei]; len += e.len; sun += e.len * (1 - e.shade); tree += e.len * (e.tshade || 0);
       if (e.k === 'major' || e.k === 'majordup') major += e.len; if (e.k === 'steps') steps++;
       if (e.sig) sigSet.set(e.cw, { sig: e.sig, sun: 1 - e.shade });
     }
@@ -540,7 +561,7 @@ const Engine = (() => {
     const sig = sigSet.size, sigAssumed = [...sigSet.values()].filter(v => v.sig === 2).length;
     for (const v of sigSet.values()) { waitTot += waitMin; waitSun += waitMin * v.sun; }
     const walkMin = len / speed / 60, wait = waitTot;
-    return { path, from: v, to: reached, len, sunLen: sun, walkMin, waitMin: wait, min: walkMin + wait, sunMin: sun / speed / 60 + waitSun, majorLen: major, steps, sig, sigAssumed };
+    return { path, from: v, to: reached, len, sunLen: sun, walkMin, waitMin: wait, min: walkMin + wait, sunMin: sun / speed / 60 + waitSun, treeLen: tree, majorLen: major, steps, sig, sigAssumed };
   }
 
   // 경로를 좌표열 + 구간별 그늘 정보로 펼치기 (방향에 맞게 조각 순서 정렬)
@@ -642,6 +663,234 @@ const shader = Engine.makeShader(G, D, IDX);
 const EXT = [Infinity, Infinity, -Infinity, -Infinity];
 for (const [x, y] of D.nodes) { EXT[0] = Math.min(EXT[0], x); EXT[1] = Math.min(EXT[1], y); EXT[2] = Math.max(EXT[2], x); EXT[3] = Math.max(EXT[3], y); }
 
+// ---------- AI 나무 높이 지도 (Meta·WRI Canopy Height Maps v2): 경로 주변만 웹에서 받아 씀 ----------
+// 위성사진을 AI(DINOv3)가 읽어 약 1m 칸마다 나무 높이(m)를 추정해 둔 지도. 웹 메르카토르 줌 10 타일(32768×32768칸)로
+// 나뉘어 있고, 타일 안은 512×512칸 조각마다 따로 압축돼 있어서 HTTP Range 요청으로 필요한 조각만 받는다.
+const CHM = (() => {
+  const BASE = 'https://data.source.coop/tge-labs/meta-chm-v2/chm/';   // Meta 원본(AWS)의 CORS 허용 미러, CC BY 4.0
+  const R = 6378137, TILE_M = 2 * Math.PI * R / 1024, D2R = Math.PI / 180;
+  const MIN_H = 3;            // 이보다 낮은 값(풀·관목·추정 오차)은 나무로 보지 않음
+  const MAX_BLOCKS = 100;     // 한 번에 받는 조각 수 상한 (조각 하나 = 메모리 256KB)
+  const heads = new Map();
+  let L = 0, res = TILE_M / 32768, blocks = new Map(), hmax = 0, bytes = 0;
+  const resOf = (lv) => TILE_M / (32768 >> lv);
+  // 지역 평면 좌표(m) ↔ 세계 메르카토르 칸 좌표
+  function toG(x, y, r = res) {
+    const lat = (D.c[0] + y / D.ky) * D2R, lon = (D.c[1] + x / D.kx) * D2R;
+    return [R * (lon + Math.PI) / r, R * (Math.PI - Math.log(Math.tan(Math.PI / 4 + lat / 2))) / r];
+  }
+  function fromG(gx, gy, r = res) {
+    const lon = (gx * r / R - Math.PI) / D2R, lat = (2 * Math.atan(Math.exp(Math.PI - gy * r / R)) - Math.PI / 2) / D2R;
+    return [(lon - D.c[1]) * D.kx, (lat - D.c[0]) * D.ky];
+  }
+  const quadkey = (tx, ty) => { let q = ''; for (let i = 10; i > 0; i--) { const m = 1 << (i - 1); q += ((tx & m) ? 1 : 0) + ((ty & m) ? 2 : 0); } return q; };
+
+  async function getRange(url, a, b) {
+    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), 30000);
+    try {
+      const r = await fetch(url, { headers: { Range: `bytes=${a}-${b}` }, signal: ac.signal });
+      if (r.status === 404 || r.status === 403) return null;              // 바다 등 자료가 없는 타일
+      if (r.status !== 206) { ac.abort(); throw new Error('HTTP ' + r.status); }
+      const u = new Uint8Array(await r.arrayBuffer()); bytes += u.length; return u;
+    } finally { clearTimeout(timer); }
+  }
+  async function inflate(u8) {
+    const s = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate'));
+    return new Uint8Array(await new Response(s).arrayBuffer());
+  }
+  // 타일 파일 머리말: 해상도 단계별 조각 위치·크기 표가 어디 있는지
+  function header(q) {
+    if (heads.has(q)) return heads.get(q);
+    const p = (async () => {
+      const url = BASE + q + '.tif';
+      const buf = await getRange(url, 0, 131071); if (!buf) return null;
+      const v = new DataView(buf.buffer, buf.byteOffset, buf.byteLength), le = v.getUint16(0) === 0x4949, big = v.getUint16(2, le) === 43;
+      const u16 = (o) => v.getUint16(o, le), u32 = (o) => v.getUint32(o, le), u64 = (o) => Number(v.getBigUint64(o, le));
+      const SZ = { 3: 2, 4: 4, 16: 8 };
+      const ifds = []; let off = big ? u64(8) : u32(4);
+      while (off && off + 16 < buf.length && ifds.length < 40) {
+        const n = big ? u64(off) : u16(off), ent = big ? 20 : 12, b0 = off + (big ? 8 : 2), d = {};
+        if (b0 + n * ent + 8 > buf.length) break;
+        for (let i = 0; i < n; i++) {
+          const e = b0 + i * ent, tag = u16(e), typ = u16(e + 2), cnt = big ? u64(e + 4) : u32(e + 4), vo = e + (big ? 12 : 8);
+          d[tag] = { typ, cnt, at: (SZ[typ] || 1) * cnt <= (big ? 8 : 4) ? vo : (big ? u64(vo) : u32(vo)) };
+        }
+        ifds.push(d); const nx = b0 + n * ent; off = big ? u64(nx) : u32(nx);
+      }
+      const num = (d, tag) => { const t = d[tag]; return !t ? 0 : t.typ === 3 ? u16(t.at) : t.typ === 16 ? u64(t.at) : u32(t.at); };
+      async function arr(t) {   // 조각 위치·크기 표 읽기 (머리말 밖에 있으면 그 부분만 더 받음)
+        const sz = SZ[t.typ] || 4, end = t.at + sz * t.cnt;
+        let src = buf, base = 0;
+        if (end > buf.length) { src = await getRange(url, t.at, end - 1); base = t.at; if (!src) throw new Error('표 없음'); }
+        const w = new DataView(src.buffer, src.byteOffset, src.byteLength), out = new Float64Array(t.cnt);
+        for (let i = 0; i < t.cnt; i++) { const o = t.at - base + i * sz; out[i] = sz === 2 ? w.getUint16(o, le) : sz === 8 ? Number(w.getBigUint64(o, le)) : w.getUint32(o, le); }
+        return out;
+      }
+      const levels = [], masks = new Map();
+      for (const d of ifds) {
+        const ent = { w: num(d, 256), tw: num(d, 322), comp: num(d, 259), offs: d[324], cnts: d[325] };
+        if (!ent.offs || !ent.cnts || ent.tw !== 512) continue;
+        if (num(d, 258) === 1 && num(d, 262) === 4) masks.set(ent.w, ent);        // 구름 표시(1비트 마스크)
+        else if (num(d, 258) === 8) levels.push(ent);
+      }
+      levels.sort((a, b) => b.w - a.w);
+      for (const lv of levels) lv.mask = masks.get(lv.w) || null;
+      // 구름 표시의 뜻(1=정상인지 1=구름인지) 확인: 가장 작은 축소판에서 나무가 있는 칸 대부분이 1이면 1=정상
+      let invert = false;
+      const sm = levels[levels.length - 1];
+      if (sm && sm.mask && sm.w <= 1024) {
+        try {
+          const [o, c, mo, mc] = await Promise.all([arr(sm.offs), arr(sm.cnts), arr(sm.mask.offs), arr(sm.mask.cnts)]);
+          if (c[0] > 0 && mc[0] > 0) {
+            const [dd, mm] = await Promise.all([getRange(url, o[0], o[0] + c[0] - 1), getRange(url, mo[0], mo[0] + mc[0] - 1)]);
+            const dv = sm.comp === 8 ? await inflate(dd) : dd, mv = sm.mask.comp === 8 ? await inflate(mm) : mm;
+            let n = 0, one = 0;
+            for (let i = 0; i < Math.min(dv.length, 262144); i++) if (dv[i] >= MIN_H) { n++; if ((mv[(i >> 9) * 64 + ((i & 511) >> 3)] >> (7 - (i & 7))) & 1) one++; }
+            invert = n >= 20 && one / n < 0.5;
+          }
+        } catch (e) { /* 확인 못 하면 GDAL 표준(1=정상)으로 */ }
+      }
+      return { url, levels, arr, invert };
+    })();
+    heads.set(q, p); p.catch(() => heads.delete(q));
+    return p;
+  }
+  // 가까운 조각끼리 묶어 한 번의 Range 요청으로 받음 (동시에 6개까지)
+  async function fetchPieces(url, list) {
+    list = list.filter(x => x.cnt > 0).sort((a, b) => a.off - b.off);
+    const groups = [];
+    for (const x of list) {
+      const g = groups[groups.length - 1];
+      if (g && x.off - g.end <= 16384 && x.off + x.cnt - g.start <= 4 << 20) { g.items.push(x); g.end = Math.max(g.end, x.off + x.cnt); }
+      else groups.push({ start: x.off, end: x.off + x.cnt, items: [x] });
+    }
+    let i = 0;
+    await Promise.all(Array.from({ length: 6 }, async () => {
+      while (i < groups.length) { const g = groups[i++]; const u = await getRange(url, g.start, g.end - 1); if (!u) continue; for (const x of g.items) await x.put(u.subarray(x.off - g.start, x.off - g.start + x.cnt)); }
+    }));
+  }
+  // 건물 바닥 칸(짝홀 규칙 주사선 채우기)
+  function fillPoly(hit, poly, bx, by) {
+    const P = poly.map(([x, y]) => { const g = toG(x, y); return [g[0] - bx * 512, g[1] - by * 512]; });
+    let y0 = Infinity, y1 = -Infinity; for (const p of P) { if (p[1] < y0) y0 = p[1]; if (p[1] > y1) y1 = p[1]; }
+    y0 = Math.max(0, Math.floor(y0)); y1 = Math.min(511, Math.ceil(y1)); let any = false;
+    for (let y = y0; y <= y1; y++) {
+      const yc = y + 0.5, xs = [];
+      for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const [ax, ay] = P[j], [cx, cy] = P[i]; if ((ay > yc) !== (cy > yc)) xs.push(ax + (yc - ay) * (cx - ax) / (cy - ay)); }
+      xs.sort((p, q) => p - q);
+      for (let k = 0; k + 1 < xs.length; k += 2) { const xa = Math.max(0, Math.ceil(xs[k] - 0.5)), xb = Math.min(511, Math.floor(xs[k + 1] - 0.5)); for (let x = xa; x <= xb; x++) { hit[y * 512 + x] = 1; any = true; } }
+    }
+    return any;
+  }
+  // 건물 칸과 그 둘레 1칸은 0으로 (AI가 건물 지붕을 나무로 잘못 본 값 제거, 건물 그림자는 따로 계산)
+  function maskBuildings(a, bx, by) {
+    const [xa, ya] = fromG(bx * 512, (by + 1) * 512), [xb, yb] = fromG((bx + 1) * 512, by * 512);
+    const cell = IDX.cell, seen = new Set(), hit = new Uint8Array(262144); let any = false;
+    for (let i = Math.floor(xa / cell); i <= Math.floor(xb / cell); i++) for (let j = Math.floor(ya / cell); j <= Math.floor(yb / cell); j++) {
+      const l = IDX.grid.get(IDX.key(i, j)); if (!l) continue;
+      for (const bi of l) { if (seen.has(bi)) continue; seen.add(bi); if (fillPoly(hit, D.blds[bi].p, bx, by)) any = true; }
+    }
+    if (!any) return;
+    for (let y = 0; y < 512; y++) for (let x = 0; x < 512; x++) if (hit[y * 512 + x])
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const X = x + dx, Y = y + dy; if (X >= 0 && X < 512 && Y >= 0 && Y < 512) a[Y * 512 + X] = 0; }
+  }
+  function finish(d, m, bx, by, inv) {
+    const a = d.length === 262144 ? d : new Uint8Array(262144);
+    const bad = inv ? 1 : 0;
+    for (let i = 0; i < 262144; i++) {
+      let v = a[i];
+      if (v < MIN_H) v = 0; else if (m && m.length >= 32768 && ((m[(i >> 9) * 64 + ((i & 511) >> 3)] >> (7 - (i & 7))) & 1) === bad) v = 0;   // 구름으로 표시된 칸
+      a[i] = v;
+    }
+    maskBuildings(a, bx, by);
+    let hm = 0; for (let i = 0; i < 262144; i++) if (a[i] > hm) hm = a[i];
+    return hm ? { a, hmax: hm } : null;   // 나무가 없는 조각은 메모리에 두지 않음
+  }
+  // 사각형 [서, 남, 동, 북](m)에 필요한 조각. 상한을 넘으면 해상도를 한 단계씩 낮춤 (약 1m → 2m → 4m → 8m)
+  function plan(bb) {
+    for (let lv = 0; lv <= 3; lv++) {
+      const r = resOf(lv), [gx0, gy1] = toG(bb[0], bb[1], r), [gx1, gy0] = toG(bb[2], bb[3], r);
+      const p = { lv, bx0: Math.floor(gx0 / 512), bx1: Math.floor(gx1 / 512), by0: Math.floor(gy0 / 512), by1: Math.floor(gy1 / 512) };
+      if ((p.bx1 - p.bx0 + 1) * (p.by1 - p.by0 + 1) <= MAX_BLOCKS) return p;
+    }
+    return null;
+  }
+  const keyOf = (bx, by) => bx * 1048576 + by;
+  function covers(bb) {
+    const p = plan(bb); if (!p || p.lv !== L || !blocks.size) return false;
+    for (let bx = p.bx0; bx <= p.bx1; bx++) for (let by = p.by0; by <= p.by1; by++) if (!blocks.has(keyOf(bx, by))) return false;
+    return true;
+  }
+  async function load(bb) {
+    const p = plan(bb); if (!p) return { ok: false, reason: 'big' };
+    if (p.lv !== L) { blocks = new Map(); L = p.lv; res = resOf(L); }
+    const need = []; for (let bx = p.bx0; bx <= p.bx1; bx++) for (let by = p.by0; by <= p.by1; by++) need.push([bx, by, keyOf(bx, by)]);
+    if (blocks.size + need.length > MAX_BLOCKS * 1.5) { const keep = new Set(need.map(n => n[2])); for (const k of [...blocks.keys()]) if (!keep.has(k)) blocks.delete(k); }
+    const per = 64 >> L, byTile = new Map(), b0 = bytes, lv = L;
+    for (const n of need) { if (blocks.has(n[2])) continue; const q = quadkey(Math.floor(n[0] / per), Math.floor(n[1] / per)); if (!byTile.has(q)) byTile.set(q, []); byTile.get(q).push(n); }
+    const got = new Map();
+    await Promise.all([...byTile].map(async ([q, list]) => {
+      const h = await header(q), lev = h && h.levels[lv];
+      if (!lev || lev.w !== 32768 >> lv || (lev.comp !== 8 && lev.comp !== 1)) { for (const n of list) got.set(n[2], null); return; }
+      lev.o = lev.o || await h.arr(lev.offs); lev.c = lev.c || await h.arr(lev.cnts);
+      const mk = lev.mask; if (mk) { mk.o = mk.o || await h.arr(mk.offs); mk.c = mk.c || await h.arr(mk.cnts); }
+      const jobs = [], part = new Map();
+      const dec = (u, comp) => comp === 8 ? inflate(u) : Promise.resolve(u.slice());
+      for (const [bx, by, k] of list) {
+        const i = (by % per) * per + (bx % per); part.set(k, {});
+        jobs.push({ off: lev.o[i], cnt: lev.c[i], put: async (u) => { part.get(k).d = await dec(u, lev.comp); } });
+        if (mk && mk.c[i] > 0) jobs.push({ off: mk.o[i], cnt: mk.c[i], put: async (u) => { part.get(k).m = await dec(u, mk.comp); } });
+      }
+      await fetchPieces(h.url, jobs);
+      for (const [bx, by, k] of list) { const g = part.get(k); got.set(k, g && g.d ? [g.d, g.m, bx, by, h.invert] : null); }
+    }));
+    if (lv !== L) return { ok: false, reason: 'stale' };
+    for (const [k, g] of got) blocks.set(k, g ? finish(...g) : null);
+    hmax = 0; for (const b of blocks.values()) if (b && b.hmax > hmax) hmax = b.hmax;
+    return { ok: true, lv: L, kb: Math.round((bytes - b0) / 1024) };
+  }
+  // 나무 높이 조회 (최근 조각 기억)
+  let lastK = -1, lastA = null;
+  function hAt(gx, gy) {
+    const k = keyOf(gx >> 9, gy >> 9);
+    if (k !== lastK) { lastK = k; const b = blocks.get(k); lastA = b ? b.a : null; }
+    return lastA ? lastA[(gy & 511) * 512 + (gx & 511)] : 0;
+  }
+  function heightAt(x, y) { const [gx, gy] = toG(x, y); return hAt(Math.floor(gx), Math.floor(gy)); }
+  // 점 (x, y)에서 해 쪽으로 칸 크기만큼씩 나아가며, 그 자리 나무 높이가 빛줄기 높이 t·tan(고도)보다 높으면 나무 그늘
+  function shaded(x, y, sun) {
+    if (!hmax) return false;
+    const tanA = Math.tan(sun.alt * D2R); if (tanA <= 0) return true;
+    const ux = Math.sin(sun.az * D2R), uy = Math.cos(sun.az * D2R);
+    const [g0x, g0y] = toG(x, y), cl = Math.cos((D.c[0] + y / D.ky) * D2R);
+    const ax = R * D2R / (D.kx * res), ay = -R * D2R / (D.ky * res * cl);   // 지역 1m가 칸 몇 개인지
+    const step = res * cl, Lmax = Math.min(hmax / tanA, 150);
+    lastK = -1;
+    for (let t = 0; t <= Lmax; t += step) if (hAt(Math.floor(g0x + ux * t * ax), Math.floor(g0y + uy * t * ay)) > t * tanA) return true;
+    return false;
+  }
+  // 지도에 그릴 조각 그림 (나무 칸만 초록, 높을수록 진하게)
+  function tiles() {
+    const out = [];
+    for (const [k, b] of blocks) {
+      if (!b) continue;
+      if (!b.url) {
+        const c = document.createElement('canvas'); c.width = c.height = 256; const ctx = c.getContext('2d'), im = ctx.createImageData(256, 256);
+        for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+          const i = (y * 2) * 512 + x * 2, h = Math.max(b.a[i], b.a[i + 1], b.a[i + 512], b.a[i + 513]); if (!h) continue;
+          const o = (y * 256 + x) * 4; im.data[o] = 47; im.data[o + 1] = 125; im.data[o + 2] = 50; im.data[o + 3] = Math.round(90 + Math.min(h, 25) / 25 * 120);
+        }
+        ctx.putImageData(im, 0, 0); b.url = c.toDataURL('image/png');
+      }
+      const bx = Math.floor(k / 1048576), by = k - bx * 1048576;
+      const [x0, yN] = fromG(bx * 512, by * 512), [x1, yS] = fromG((bx + 1) * 512, (by + 1) * 512);
+      out.push({ url: b.url, x0, x1, yN, yS });
+    }
+    return out;
+  }
+  return { load, covers, plan, shaded, heightAt, tiles, get hmax() { return hmax; }, get level() { return L; }, get resM() { return res * Math.cos(D.c[0] * D2R); }, get bytes() { return bytes; } };
+})();
+
 $('dataStamp').textContent = `지도 데이터: OpenStreetMap 기여자 (${D.meta.osm_ts.slice(0, 10)} 기준)`;
 
 // ---------- 장소 목록 ----------
@@ -729,7 +978,63 @@ function recompute() {
   state.cool = Engine.route(G, ptsOf(S), ptsOf(E), { ...base, alpha: state.alpha });
   state.transit = transitPlan(S, E, base);
   render();
+  ensureTrees();
 }
+
+// ---------- AI 나무 그늘: 경로 주변 자료를 받아 오고, 도착하면 다시 계산 ----------
+const TREE = { on: true, ver: 0, token: 0, sig: '', loads: 0, kb: 0, st: 'idle' };
+if (/[?&]debug\b/.test(location.search)) window.__dbg = { CHM, state, D, TREE };   // 점검용
+function routeBox() {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const add = (n) => { const [x, y] = D.nodes[n]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; };
+  for (const r of [state.fast, state.cool]) if (r) { add(r.from); for (const p of r.path) add(p.to); }
+  if (state.S) add(state.S.node); if (state.E) add(state.E.node);
+  if (!isFinite(x0)) return null;
+  const m = 250; return [x0 - m, y0 - m, x1 + m, y1 + m];   // 경로 둘레 250m (나무 그림자가 닿는 거리 + 그늘 길이 돌아갈 여유)
+}
+function treeStatus(st, extra) {
+  TREE.st = st;
+  const box = $('treeStat'), t = $('treeText');
+  box.className = 'treestat' + (st === 'loading' ? ' wait' : st === 'error' || st === 'big' ? ' err' : '');
+  box.hidden = st === 'idle';
+  const lvTxt = CHM.level ? ` 경로가 길어 약 ${CHM.resM.toFixed(1)}m 간격으로 줄인 자료를 썼습니다.` : '';
+  t.textContent =
+    st === 'loading' ? 'AI 나무 그늘을 받는 중입니다. 지금 보이는 결과는 건물 그림자만으로 계산한 것이고, 나무 자료가 도착하면 다시 계산합니다.' :
+    st === 'done' ? `AI 나무 그늘 반영됨. 위성사진을 AI가 읽어 1m 칸마다 나무 높이를 추정한 지도(Meta·WRI Canopy Height Maps v2)에서 이 경로 주변만 받았습니다 (${TREE.kb >= 1024 ? (TREE.kb / 1024).toFixed(1) + 'MB' : TREE.kb + 'KB'}).${lvTxt}` :
+    st === 'off' ? 'AI 나무 그늘을 끈 상태입니다. 건물 그림자만으로 계산합니다.' :
+    st === 'big' ? '경로가 너무 길어 나무 자료는 받지 않았습니다. 건물 그림자만으로 계산했습니다.' :
+    st === 'error' ? `나무 높이 자료를 받지 못해 건물 그림자만 반영했습니다${extra ? ` (${extra})` : ''}. 인터넷 연결을 확인하세요.` : '';
+}
+function ensureTrees() {
+  if (!TREE.on) return;
+  if (!state.fast || !state.sun || state.sun.alt <= 0) { if (TREE.st === 'loading') treeStatus('idle'); return; }
+  const bb = routeBox(); if (!bb) return;
+  if (CHM.covers(bb)) { if (TREE.st !== 'done' && CHM.hmax >= 0 && TREE.kb) treeStatus('done'); return; }
+  if (!CHM.plan(bb)) { treeStatus('big'); return; }
+  const sig = state.S.node + '>' + state.E.node;
+  if (sig !== TREE.sig) { TREE.sig = sig; TREE.loads = 0; }
+  if (TREE.loads >= 3) return;            // 같은 출발·도착에서 경로가 계속 바깥으로 바뀌는 경우 무한 반복 방지
+  TREE.loads++;
+  const tk = ++TREE.token;
+  treeStatus('loading');
+  CHM.load(bb).then((r) => {
+    if (tk !== TREE.token || !TREE.on) return;
+    if (!r.ok) { if (r.reason === 'big') treeStatus('big'); return; }
+    TREE.kb += r.kb; TREE.ver++;
+    shader.setTrees(CHM.shaded);
+    treeStatus('done');
+    recompute();
+  }).catch((err) => {
+    if (tk !== TREE.token) return;
+    treeStatus('error', err && err.name === 'AbortError' ? '30초 안에 응답 없음' : '');
+  });
+}
+$('inTree').addEventListener('change', () => {
+  TREE.on = $('inTree').checked; TREE.token++; TREE.loads = 0;
+  if (TREE.on) { if (CHM.hmax || TREE.kb) shader.setTrees(CHM.shaded); treeStatus('idle'); }
+  else { shader.setTrees(null); treeStatus('off'); }
+  TREE.ver++; staticKey = ''; treeKey = ''; recompute();
+});
 function showSun() {
   const s = state.sun, up = s.alt > 0;
   $('outAlt').textContent = up ? s.alt.toFixed(1) + '°' : '지평선 아래';
@@ -805,13 +1110,19 @@ function statHTML(r) {
 function render() {
   const { fast, cool } = state;
   $('statCool').innerHTML = statHTML(cool); $('statFast').innerHTML = statHTML(fast);
-  for (const [id, r] of [['barCool', cool], ['barFast', fast]]) $(id).firstElementChild.style.width = r ? (r.sunLen / r.len * 100).toFixed(1) + '%' : '0';
+  for (const [id, r] of [['barCool', cool], ['barFast', fast]]) $(id).innerHTML = r ? `<i style="width:${(r.sunLen / r.len * 100).toFixed(1)}%"></i><b style="width:${((r.treeLen || 0) / r.len * 100).toFixed(1)}%"></b>` : '<i></i>';
+  const treeUsed = TREE.on && TREE.kb > 0 && state.sun && state.sun.alt > 0;
+  for (const [id, r] of [['shCool', cool], ['shFast', fast]]) {
+    if (!r || !treeUsed) { $(id).textContent = ''; continue; }
+    const pc = (v) => Math.round(v / r.len * 100), all = pc(r.len - r.sunLen), tr = Math.min(all, pc(r.treeLen || 0));
+    $(id).textContent = `그늘 ${all}% = 건물 ${all - tr}% + 나무 ${tr}%`;
+  }
   if (cool && fast) {
     const same = Math.abs(cool.len - fast.len) < 1 && Math.abs(cool.sunLen - fast.sunLen) < 1;
     const night = state.sun.alt <= 0;
     $('noteCool').textContent = night ? '해가 진 시각이라 두 길이 같습니다.' : same ? '이 시각에는 더 그늘진 대안이 없어 빠른 길과 같습니다.' : `햇볕 ${(fast.sunMin - cool.sunMin).toFixed(1)}분 덜 받고, ${Math.round(cool.len - fast.len)}m 더 걷습니다.`;
     $('sigCool').textContent = sigLine(cool); $('sigFast').textContent = sigLine(fast);
-    $('noteFast').textContent = `그늘 비율 ${Math.round((1 - fast.sunLen / fast.len) * 100)}% · 그늘 우선 길은 ${Math.round((1 - cool.sunLen / cool.len) * 100)}%`;
+    $('noteFast').textContent = TREE.on && TREE.kb > 0 && state.sun.alt > 0 ? '' : `그늘 비율 ${Math.round((1 - fast.sunLen / fast.len) * 100)}% · 그늘 우선 길은 ${Math.round((1 - cool.sunLen / cool.len) * 100)}%`;
   } else { $('sigCool').textContent = $('sigFast').textContent = ''; $('noteCool').textContent = $('noteFast').textContent = state.S && state.E && state.S.node === state.E.node ? '출발지와 도착지가 같습니다.' : state.S && state.E && comp[state.S.node] !== comp[state.E.node] ? '두 곳은 걸어서 이어지는 길이 없습니다(섬이나 걸어서 건널 수 없는 다리 등).' : '이어지는 길을 찾지 못했습니다.'; }
   const lw = $('longWarn'), LR = cool || fast;
   if (LR && LR.len > 5000) { lw.hidden = false; lw.textContent = `경로가 ${(LR.len / 1000).toFixed(1)}km입니다. 한여름에 이만큼 걷는 것은 위험할 수 있으니 대중교통과 함께 이용하세요.`; } else lw.hidden = true;
@@ -939,6 +1250,7 @@ function drawSketch() {
   el('path', { d: routePath(U), stroke: 'var(--surface)', 'stroke-width': 11 * k, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, gRoute);
   el('path', { d: routePath(U, 0), stroke: 'var(--sun)', 'stroke-width': 6.5 * k, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, gRoute);
   el('path', { d: routePath(U, 1), stroke: 'var(--shade)', 'stroke-width': 6.5 * k, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, gRoute);
+  el('path', { d: routePath(U, 2), stroke: 'var(--tree)', 'stroke-width': 6.5 * k, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, gRoute);
   // 6) 횡단보도
   for (let i = 0; i < U.pieces.length; i++) {
     if (U.pieces[i].k !== 'crossing') continue; let j = i; while (j + 1 < U.pieces.length && U.pieces[j + 1].k === 'crossing') j++;
@@ -1093,6 +1405,7 @@ function pathOfPolys(polys) { let s = ''; for (const p of polys) { s += 'M' + p.
 function buildMapLayers() {
   gWorld.innerHTML = ''; layer = {};
   layer.green = el('path', { fill: 'var(--green)', stroke: 'none', opacity: 0.9 }, gWorld);
+  layer.trees = el('g', { style: 'image-rendering:pixelated' }, gWorld);
   layer.shadow = el('path', { fill: 'var(--shadow-fill)', opacity: 0.22, stroke: 'none' }, gWorld);
   layer.net = el('path', { stroke: 'var(--net)', 'stroke-width': 1.6, fill: 'none', 'vector-effect': 'non-scaling-stroke' }, gWorld);
   layer.netShade = el('path', { stroke: 'var(--shade)', 'stroke-width': 1.8, fill: 'none', opacity: 0.55, 'vector-effect': 'non-scaling-stroke' }, gWorld);
@@ -1109,6 +1422,7 @@ function buildMapLayers() {
   layer.routeCoolCase = el('path', { fill: 'none', stroke: 'var(--surface)', 'stroke-width': 9, 'vector-effect': 'non-scaling-stroke', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, gWorld);
   layer.routeSun = el('path', { fill: 'none', stroke: 'var(--sun)', 'stroke-width': 6, 'vector-effect': 'non-scaling-stroke', 'stroke-linecap': 'round' }, gWorld);
   layer.routeShade = el('path', { fill: 'none', stroke: 'var(--shade)', 'stroke-width': 6, 'vector-effect': 'non-scaling-stroke', 'stroke-linecap': 'round' }, gWorld);
+  layer.routeTree = el('path', { fill: 'none', stroke: 'var(--tree)', 'stroke-width': 6, 'vector-effect': 'non-scaling-stroke', 'stroke-linecap': 'round' }, gWorld);
   layer.labels = el('g', {}, gWorld);
   layer.marks = el('g', {}, gWorld);
   if (!mapIdx) buildMapIndex();
@@ -1152,8 +1466,19 @@ function drawStatic() {
   }
   layer.bld.forEach((pth, i) => pth.setAttribute('d', pathOfPolys(cls[i])));
   layer.shadow.setAttribute('d', pathOfPolys(polys));
+  drawTrees(detail);
 }
-function routePath(U, wantShade) {  // wantShade: undefined=전체, 1=그늘 조각, 0=햇볕 조각
+// AI 나무 높이 층 (받아 온 조각만)
+let treeKey = '';
+function drawTrees(detail) {
+  const on = $('chkTree').checked && TREE.on && detail;
+  const key = on ? TREE.ver + '|' + CHM.level : 'off';
+  if (key === treeKey) return; treeKey = key;
+  layer.trees.innerHTML = '';
+  if (!on) return;
+  for (const t of CHM.tiles()) el('image', { href: t.url, x: t.x0, y: -t.yN, width: t.x1 - t.x0, height: t.yN - t.yS, preserveAspectRatio: 'none' }, layer.trees);
+}
+function routePath(U, wantShade) {  // wantShade: undefined=전체, 0=햇볕, 1=건물 그늘, 2=나무 그늘 조각
   if (!U) return '';
   const at = (d) => { // 거리 d 지점 좌표
     let lo = 0, hi = U.pts.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (U.pts[m].d <= d) lo = m; else hi = m; }
@@ -1187,6 +1512,7 @@ function drawMap() {
   layer.routeCoolCase.setAttribute('d', routePath(Uc));
   layer.routeSun.setAttribute('d', routePath(Uc, 0));
   layer.routeShade.setAttribute('d', routePath(Uc, 1));
+  layer.routeTree.setAttribute('d', routePath(Uc, 2));
   applyView();
 }
 let viewRaf = 0, lastCenter = null;
@@ -1235,7 +1561,7 @@ function drawTiles() {
     if (bx < EXT[0] - 2000 || ax > EXT[2] + 2000 || ay < EXT[1] - 2000 || by > EXT[3] + 2000) continue;   // 인천 밖 타일은 받지 않음
     const img = el('image', { x: ax, y: -ay, width: bx - ax, height: (-by) - (-ay), preserveAspectRatio: 'none', opacity: 0.85 }, gTiles);
     img.addEventListener('error', () => { tileErr++; if (tileErr > 3 && !tileOk) { $('attrib').textContent = '배경 지도를 불러오지 못했습니다(인터넷 또는 미리보기 제한). 건물·길은 내장 데이터로 그립니다. 지도 데이터 © OpenStreetMap 기여자'; } }, { once: true });
-    img.addEventListener('load', () => { tileOk++; $('attrib').textContent = '지도 데이터 © OpenStreetMap 기여자 · 배경 지도 © CARTO'; }, { once: true });
+    img.addEventListener('load', () => { tileOk++; $('attrib').textContent = '지도 데이터 © OpenStreetMap 기여자 · 배경 지도 © CARTO · 나무 높이 © Meta·WRI CHMv2 (CC BY 4.0)'; }, { once: true });
     img.setAttribute('href', `https://${'abcd'[(tx + ty) % 4]}.basemaps.cartocdn.com/${style}/${z}/${tx}/${ty}.png`);
   }
 }
@@ -1277,6 +1603,7 @@ $('pickS').onclick = () => setPick(state.pick === 's' ? null : 's');
 $('pickE').onclick = () => setPick(state.pick === 'e' ? null : 'e');
 $('chkTiles').onchange = drawTiles;
 $('chkShadow').onchange = () => { staticKey = ''; applyView(); };
+$('chkTree').onchange = () => { staticKey = ''; treeKey = ''; applyView(); };
 
 // ---------- 탭 ----------
 function setView(v) {
@@ -1318,7 +1645,7 @@ $('btnWx').onclick = async () => {
     let text = $('fbText').value.trim();
     if ($('fbCtx').checked && state.S && state.E) {
       const sun = state.sun.alt > 0 ? `고도 ${state.sun.alt.toFixed(1)}°·방위 ${Math.round(state.sun.az)}°${state.sunMode === 'manual' ? '(직접 조절)' : ''}` : '해 없음';
-      text += `${text ? '\n\n' : ''}[사용 조건] ${state.nameS || state.S.name} → ${state.nameE || state.E.name} · ${$('inDate').value} ${$('inTime').value} · ${sun} · 그늘 우선도 ${state.alpha} · ${state.sel === 'cool' ? '그늘 우선 길' : '가장 빠른 길'} 보는 중`;
+      text += `${text ? '\n\n' : ''}[사용 조건] ${state.nameS || state.S.name} → ${state.nameE || state.E.name} · ${$('inDate').value} ${$('inTime').value} · ${sun} · 그늘 우선도 ${state.alpha} · AI 나무 그늘 ${TREE.on ? (TREE.st === 'done' ? '반영' : '켬(' + TREE.st + ')') : '끔'} · ${state.sel === 'cool' ? '그늘 우선 길' : '가장 빠른 길'} 보는 중`;
     }
     return { name: $('fbName').value.trim(), score, text };
   }
@@ -1403,7 +1730,7 @@ function updateSummaries() {
   const [, mo, d] = ($('inDate').value || '2026-07-25').split('-').map(Number);
   $('sumWhen').textContent = state.sunMode === 'manual' ? `직접 조절 · 고도 ${s0.alt.toFixed(0)}°` : `${mo}월 ${d}일 ${$('inTime').value} · 고도 ${Math.max(0, s0.alt).toFixed(0)}°`;
   $('sumWx').textContent = `체감 ${$('outAT').textContent}`;
-  $('sumAlpha').textContent = state.alpha === 0 ? '빠른 길만' : `그늘 우선 ${state.alpha}`;
+  $('sumAlpha').textContent = (state.alpha === 0 ? '빠른 길만' : `그늘 우선 ${state.alpha}`) + (TREE.on ? ' · 나무 반영' : ' · 나무 끔');
 }
 if (matchMedia('(max-width: 900px)').matches) for (const dd of document.querySelectorAll('details.sec')) dd.open = false;
 
