@@ -809,8 +809,9 @@ const CHM = (() => {
     let hm = 0; for (let i = 0; i < 262144; i++) if (a[i] > hm) hm = a[i];
     return hm ? { a, orig: a.slice(), hmax: hm } : null;   // 나무가 없는 조각은 메모리에 두지 않음
   }
-  // 브라우저에서 돌린 나무 찾기 AI 결과를 합침: AI가 본 곳은 AI가 나무라고 한 칸만 나무로 두고,
-  // 높이는 CHM 값을 쓰되 CHM에 나무가 없던 칸(그 뒤 자란·심은 나무)은 기본 높이를 씀
+  // 브라우저에서 돌린 나무 찾기 AI 결과를 합침 (더하기만 함): AI가 나무라고 본 칸 중 CHM에 나무가 없던 칸은 기본 높이의 나무로 추가.
+  // AI가 '나무 아님'이라고 한 칸을 지우지 않는 이유: 인천의 최신 위성사진이 겨울·초봄(잎 없는 때) 사진이라
+  // 활엽수 가로수가 앙상한 가지로만 보여 AI가 놓치기 때문 (여름 그늘은 잎이 있을 때 사진으로 만든 CHM 쪽이 맞음)
   function applyAI(ai) {
     if (L !== 0) return 0;
     let changed = 0;
@@ -821,7 +822,7 @@ const CHM = (() => {
       const a = new Uint8Array(262144);
       for (let y = 0; y < 512; y++) for (let x = 0; x < 512; x++) {
         const i = y * 512 + x, f = ai.frac(bx * 512 + x, by * 512 + y), o = orig ? orig[i] : 0;
-        a[i] = f < 0 ? o : f >= 0.5 ? (o >= MIN_H ? o : ai.defH) : 0;
+        a[i] = f >= 0.5 && o < MIN_H ? ai.defH : o;
       }
       maskBuildings(a, bx, by);
       let hm = 0; for (let i = 0; i < 262144; i++) if (a[i] > hm) hm = a[i];
@@ -951,14 +952,19 @@ const TREEAI = (() => {
     for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); got += value.length; onp && onp(got / total); }
     const out = new Uint8Array(got); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out;
   }
+  let ep = 'wasm';
+  async function hasGPU() { try { return !!(navigator.gpu && await navigator.gpu.requestAdapter()); } catch (e) { return false; } }
   function init(onp) {
     if (ready) return ready;
     ready = (async () => {
-      ort = await import(ORT + 'ort.wasm.min.mjs');
+      const gpu = await hasGPU();                       // 그래픽 가속(WebGPU)이 되면 그쪽으로, 아니면 CPU(WebAssembly)
+      ort = await import(ORT + (gpu ? 'ort.webgpu.min.mjs' : 'ort.wasm.min.mjs'));
       ort.env.wasm.wasmPaths = ORT;
       ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
       const w = await fetchWithProgress(WEIGHTS, onp);
-      session = await ort.InferenceSession.create(b64(GRAPH), { executionProviders: ['wasm'], graphOptimizationLevel: 'all', externalData: [{ path: 'model.safetensors', data: w }] });
+      const opt = (eps) => ({ executionProviders: eps, graphOptimizationLevel: 'all', externalData: [{ path: 'model.safetensors', data: w }] });
+      if (gpu) { try { session = await ort.InferenceSession.create(b64(GRAPH), opt(['webgpu'])); ep = 'webgpu'; } catch (e) { session = null; } }
+      if (!session) { session = await ort.InferenceSession.create(b64(GRAPH), opt(['wasm'])); ep = 'wasm'; }
     })();
     ready.catch(() => { ready = null; });
     return ready;
@@ -1031,7 +1037,7 @@ const TREEAI = (() => {
     return t / 16;
   }
   function blockKeys() { const s = new Set(); for (const k of masks.keys()) { const tx = Math.floor(k / 4194304), ty = k - tx * 4194304; s.add((tx >> 3) * 1048576 + (ty >> 3)); } return s; }
-  return { init, run, frac, blockKeys, corridor, runCell, masks, get count() { return masks.size; }, get lastRun() { return lastRun; }, defH: 8 };
+  return { init, run, frac, blockKeys, corridor, runCell, masks, get count() { return masks.size; }, get lastRun() { return lastRun; }, get ep() { return ep; }, defH: 8 };
 })();
 
 $('dataStamp').textContent = `지도 데이터: OpenStreetMap 기여자 (${D.meta.osm_ts.slice(0, 10)} 기준)`;
@@ -1146,7 +1152,7 @@ function treeStatus(st, extra) {
     st === 'done' ? `나무 높이 지도(Meta·WRI Canopy Height Maps v2)에서 이 경로 주변만 받아 반영했습니다 (${TREE.kb >= 1024 ? (TREE.kb / 1024).toFixed(1) + 'MB' : TREE.kb + 'KB'}).${lvTxt}${TREE.aiOn ? ' 이어서 나무 찾기 AI를 준비합니다.' : ''}` :
     st === 'ai-model' ? `나무 찾기 AI 모델을 내려받는 중입니다 (${Math.round((extra || 0) * 100)}%, 15MB, 처음 한 번만). 지금 결과는 나무 높이 지도만 반영한 것입니다.` :
     st === 'ai-run' ? `나무 찾기 AI가 이 브라우저에서 위성사진을 분석하는 중입니다 (${extra}). 끝나면 다시 계산합니다.` :
-    st === 'ai-done' ? `AI 나무 그늘 반영됨. 나무 찾기 AI(SegFormer)가 이 브라우저에서 경로 둘레 최신 위성사진(약 0.24m 해상도) 조각 ${TREEAI.count}장을 직접 분석해 나무 위치를 찾았고, 높이는 나무 높이 지도(Meta·WRI CHMv2)에서 가져왔습니다${extra ? ` (이번 분석: ${extra})` : ''}.` :
+    st === 'ai-done' ? `AI 나무 그늘 반영됨. 나무 찾기 AI(SegFormer)가 이 브라우저에서 경로 둘레 최신 위성사진 조각 ${TREEAI.count}장을 직접 분석해, 나무 높이 지도에 없던 나무를 더했습니다${extra ? ` (이번 분석: ${extra})` : ''}. 위성사진이 잎 없는 계절 것이라 활엽수는 높이 지도 쪽 자료를 씁니다.` :
     st === 'ai-skip' ? `나무 높이 지도는 반영했지만, 경로가 길어 나무 찾기 AI는 돌리지 않았습니다 (위성사진 ${extra}장 필요).${lvTxt}` :
     st === 'ai-error' ? `나무 높이 지도만 반영했습니다. 나무 찾기 AI를 실행하지 못했습니다${extra ? ` (${extra})` : ''}.` :
     st === 'off' ? 'AI 나무 그늘을 끈 상태입니다. 건물 그림자만으로 계산합니다.' :
@@ -1203,7 +1209,7 @@ function ensureAI() {
     if (r.stale || tk !== TREE.aiToken || !TREE.on || !TREE.aiOn) return;
     TREEAI.defH = CHM.medianH();
     CHM.applyAI(TREEAI);
-    TREE.aiTime = r.cells ? `신경망 계산 ${r.cells}회, ${(r.ms / 1000).toFixed(1)}초` : '';
+    TREE.aiTime = r.cells ? `신경망 계산 ${r.cells}회, ${(r.ms / 1000).toFixed(1)}초, ${TREEAI.ep === 'webgpu' ? '그래픽 가속' : 'CPU'}` : '';
     TREE.ver++; shader.setTrees(CHM.shaded); staticKey = ''; treeKey = '';
     treeStatus('ai-done', TREE.aiTime);
     recompute();
