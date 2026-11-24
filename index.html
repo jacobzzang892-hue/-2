@@ -1635,6 +1635,7 @@ function restStops(U) {
     const [x, y] = routeAt(U, d), gx = Math.floor(x / 100), gy = Math.floor(y / 100);
     for (let i = gx - 1; i <= gx + 1; i++) for (let j = gy - 1; j <= gy + 1; j++) for (const l of RGRID.get(i * 100003 + j) || []) {
       const off = Math.hypot(l.x - x, l.y - y); if (off > 40) continue;
+      if (Math.hypot(l.x - U.pts[0].x, l.y - U.pts[0].y) < 100 || Math.hypot(l.x - U.pts[U.pts.length - 1].x, l.y - U.pts[U.pts.length - 1].y) < 100) continue;   // 출발·도착지 바로 옆은 뺌
       const c = cand.get(l); if (!c || off < c.off) cand.set(l, { l, d, off });
     }
   }
