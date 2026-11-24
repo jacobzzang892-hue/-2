@@ -157,6 +157,21 @@ button.link{border:0;background:none;padding:0 0 0 6px;color:#2C64B0;font-size:1
 .steps .n{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
 .steps .n.e{background:var(--shade)}
 .steps .t{font-weight:500} .steps .d{font-size:12.5px;color:var(--muted)}
+.rest{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.rest h3{font-size:14.5px;margin:0 0 4px}
+.rest .hint{margin:0 0 8px}
+.rest ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rest li{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px;font-size:13.5px;align-items:baseline}
+.rest .tm{white-space:nowrap;font-family:var(--mono);font-size:12px;color:var(--shade-deep);font-weight:600}
+.rest .kd{color:var(--muted);font-size:12px}
+.rest .after{display:inline-block;margin-left:4px;font-size:11.5px;color:#9A4A0B;background:#FFF1E3;border-radius:6px;padding:0 6px}
+.stage.sk{touch-action:pan-y}
+.bigbtn{padding:6px 10px;font-size:13px}
+.bigbtn[aria-pressed="true"]{background:var(--ink);color:#fff}
+body.big .steps .t{font-size:18px} body.big .steps .d{font-size:15.5px} body.big .steps h2{font-size:19px}
+body.big .rest li{font-size:16.5px} body.big .rest .tm{font-size:14.5px} body.big .rest .kd{font-size:14px}
+body.big .stat .k{font-size:13px} body.big .stat .v{font-size:23px} body.big .cardnote{font-size:14px}
+body.big .legend{font-size:14px} body.big .treestat{font-size:14.5px}
 .sunchip{color:var(--sun);font-weight:700}.shadechip{color:var(--shade-deep);font-weight:700}
 .alert{display:flex;gap:12px;align-items:flex-start;border:1px solid #F5CDD3;background:#FFF4F5;border-radius:var(--r);padding:14px 16px;font-size:13px}
 .alert svg{flex:none;width:22px;height:22px;color:var(--danger)}
@@ -312,6 +327,7 @@ svg text{font-family:var(--font)}
           <button role="tab" id="tabSketch" aria-selected="true" aria-controls="paneSketch">약도</button>
           <button role="tab" id="tabMap" aria-selected="false" aria-controls="paneMap">실제 지도</button>
           <span class="sp"></span>
+          <button class="bigbtn" id="btnBig" aria-pressed="false" title="약도·안내 글씨 크게">가 글씨 크게</button>
           <div class="tool" id="mapTools" hidden>
             <button id="pickS" aria-pressed="false">출발 찍기</button>
             <button id="pickE" aria-pressed="false">도착 찍기</button>
@@ -321,7 +337,8 @@ svg text{font-family:var(--font)}
           </div>
         </div>
         <div id="paneSketch" role="tabpanel" aria-labelledby="tabSketch">
-          <div class="stage sk"><svg id="sketch" role="img" aria-label="경로 약도"></svg></div>
+          <div class="stage sk"><svg id="sketch" role="img" aria-label="경로 약도"></svg>
+            <div class="zoom"><button id="skIn" aria-label="약도 확대">+</button><button id="skOut" aria-label="약도 축소">−</button><button id="skFit" aria-label="경로 전체 보기" style="font-size:12px">⤢</button></div></div>
         </div>
         <div id="paneMap" role="tabpanel" aria-labelledby="tabMap" hidden>
           <div class="stage" id="mapStage">
@@ -335,6 +352,7 @@ svg text{font-family:var(--font)}
           <span><i class="lg" style="background:var(--sun)"></i>햇볕 구간</span>
           <span><i class="lg" style="background:var(--shade)"></i>건물 그늘 구간</span>
           <span><i class="lg" style="background:var(--tree)"></i>나무 그늘 구간(AI)</span>
+          <span><b style="display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:2px solid var(--shade-deep);color:var(--shade-deep);font-size:9px">쉼</b>쉬어갈 곳(약도)</span>
           <span><i class="lg" style="background:var(--road);height:10px"></i>큰길</span>
           <span><svg width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><rect width="10" height="16" rx="3" fill="var(--ink)"/><circle cx="5" cy="4.5" r="2.3" fill="#E5484D"/><circle cx="5" cy="11.5" r="2.3" fill="#3DD68C"/></svg>신호등 횡단보도</span>
           <span><i class="lg" style="background:var(--muted);height:3px"></i>가장 빠른 길(실제 지도)</span>
@@ -342,7 +360,8 @@ svg text{font-family:var(--font)}
         </div>
       </div>
 
-      <div class="steps"><h2 id="stepsTitle">걷는 순서</h2><ol id="stepList"></ol></div>
+      <div class="steps"><h2 id="stepsTitle">걷는 순서</h2><ol id="stepList"></ol>
+        <div class="rest" id="restBox" hidden><h3>가는 길에 쉬어갈 곳</h3><p class="hint">경로에서 40m 안의 편의점·카페·도서관·주민센터·경로당·지하철역·정자입니다. 시간은 출발 후 걸어서 걸리는 시간입니다.</p><ul id="restList"></ul></div></div>
 
       <div class="alert" role="note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20L12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg><div><b>더위 먹은 것 같으면 바로 멈추세요.</b> 어지러움, 두통, 메스꺼움, 근육 경련이 있으면 그늘이나 냉방된 곳에서 쉬고 물을 마시세요. 의식이 흐리거나 체온이 매우 높으면 즉시 <b>119</b>에 신고하세요. 이 길은 햇볕을 덜 받는 길일 뿐, 안전을 보장하지 않습니다.</div></div>
 
@@ -1407,6 +1426,17 @@ function routeAt(U, d) {
   return [A.x + (B.x - A.x) * f, A.y + (B.y - A.y) * f];
 }
 // 약도: 실제 축척을 유지하되 큰길·경로 주변 건물·공원·역만 남긴 단순 지도
+let FS = 1;   // 약도 글씨 배율 (글씨 크게: 1.35)
+const SK = { base: null, z: 1, cx: 0, cy: 0 };
+function skApply() {
+  if (!SK.base) return;
+  const [bx, by, bw, bh] = SK.base, w = bw / SK.z, h = bh / SK.z;
+  SK.cx = Math.max(bx + w / 2, Math.min(bx + bw - w / 2, SK.cx)); SK.cy = Math.max(by + h / 2, Math.min(by + bh - h / 2, SK.cy));
+  $('sketch').setAttribute('viewBox', `${SK.cx - w / 2} ${SK.cy - h / 2} ${w} ${h}`);
+  $('sketch').style.touchAction = SK.z > 1.01 ? 'none' : 'pan-y';
+  $('skOut').disabled = SK.z <= 1.01; $('skIn').disabled = SK.z >= 5.9;
+}
+function skZoom(f) { SK.z = Math.max(1, Math.min(6, SK.z * f)); skApply(); }
 function drawSketch() {
   const svg = $('sketch'); svg.innerHTML = '';
   const U = state.U, legs = state.legs;
@@ -1423,10 +1453,17 @@ function drawSketch() {
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   const vx = cx - W / 2, vy = -cy - H / 2;
   svg.setAttribute('viewBox', `${vx} ${vy} ${W} ${H}`); svg.style.height = hpx + 'px';
+  SK.base = [vx, vy, W, H]; SK.z = 1; SK.cx = vx + W / 2; SK.cy = vy + H / 2; skApply();
   const k = W / cw;                                   // 화면 1px = k 미터
   const inView = (x, y, pad = 0) => x > vx - pad && x < vx + W + pad && -y > vy - pad && -y < vy + H + pad;
   const polyInView = (p) => p.some(([x, y]) => inView(x, y, 30));
   const gBg = el('g', {}, svg), gRoad = el('g', {}, svg), gRoute = el('g', {}, svg), gMark = el('g', {}, svg), gLab = el('g', {}, svg);
+  state.rests = restStops(U);
+  for (const c of state.rests) {      // 쉬어갈 곳 표시
+    const g = el('g', {}, gMark);
+    el('circle', { cx: c.l.x, cy: -c.l.y, r: 7.5 * k * FS, fill: '#fff', stroke: 'var(--shade-deep)', 'stroke-width': 2 * k }, g);
+    const t = el('text', { x: c.l.x, y: -c.l.y + 3.2 * k * FS, 'font-size': 9 * k * FS, 'text-anchor': 'middle', 'font-weight': 700, fill: 'var(--shade-deep)' }, g); t.textContent = '쉼';
+  }
   // 경로 근처 판정용 표본점 (15m 간격)
   const samp = []; for (let d = 0; d <= U.total; d += 15) samp.push(routeAt(U, d));
   const nearRoute = (x, y, r) => { const r2 = r * r; for (const [a, b] of samp) if ((a - x) ** 2 + (b - y) ** 2 < r2) return true; return false; };
@@ -1481,7 +1518,7 @@ function drawSketch() {
     if (!opt.force && boxes.some(b => b[0] < box[2] && box[0] < b[2] && b[1] < box[3] && box[1] < b[3])) return false;
     if (box[0] < 2 || box[2] > cw - 2 || box[1] < 2 || box[3] > hpx - 2) { if (!opt.force) return false; }
     boxes.push(box); placed.add(text);
-    const t = el('text', { x, y: -y, 'font-size': fs * k, 'font-weight': opt.weight || 500, 'text-anchor': anchor, fill: opt.fill || 'var(--ink)', 'paint-order': 'stroke', stroke: 'var(--surface)', 'stroke-width': 3.5 * k, 'stroke-linejoin': 'round', 'dominant-baseline': opt.mid ? 'central' : 'alphabetic' }, gLab);
+    const t = el('text', { x, y: -y, 'font-size': fs * k * FS, 'font-weight': opt.weight || 500, 'text-anchor': anchor, fill: opt.fill || 'var(--ink)', 'paint-order': 'stroke', stroke: 'var(--surface)', 'stroke-width': 3.5 * k, 'stroke-linejoin': 'round', 'dominant-baseline': opt.mid ? 'central' : 'alphabetic' }, gLab);
     if (rot) t.setAttribute('transform', `rotate(${rot} ${x} ${-y})`);
     t.textContent = text; return true;
   }
@@ -1490,7 +1527,7 @@ function drawSketch() {
   const ends = [[U.pts[0], U.pts[Math.min(3, U.pts.length - 1)], state.nameS, '출', 'var(--ink)'], [U.pts[U.pts.length - 1], U.pts[Math.max(0, U.pts.length - 4)], state.nameE, '도', 'var(--shade)']];
   for (const [p, q, name, ch, fill] of ends) {
     el('circle', { cx: p.x, cy: -p.y, r: 12 * k, fill, stroke: 'var(--surface)', 'stroke-width': 3 * k }, gMark);
-    const t = el('text', { x: p.x, y: -p.y, 'font-size': 11 * k, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff' }, gMark); t.textContent = ch;
+    const t = el('text', { x: p.x, y: -p.y, 'font-size': 11 * k * FS, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff' }, gMark); t.textContent = ch;
     // 8방향 후보 중 경로 선과 가장 덜 겹치는 자리에 이름 표시
     const fs = 14, w = textW(name, fs); let best = null;
     for (let a = 0; a < 8; a++) {
@@ -1511,7 +1548,7 @@ function drawSketch() {
   for (let i = 1; i < legs.length; i++) {
     const A = legs[i].A, P = legs[i - 1].A, B = legs[i].B;
     el('circle', { cx: A.x, cy: -A.y, r: 9.5 * k, fill: 'var(--ink)', stroke: 'var(--surface)', 'stroke-width': 2 * k }, gMark);
-    const t = el('text', { x: A.x, y: -A.y, 'font-size': 11 * k, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: 'var(--surface)' }, gMark); t.textContent = i;
+    const t = el('text', { x: A.x, y: -A.y, 'font-size': 11 * k * FS, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: 'var(--surface)' }, gMark); t.textContent = i;
     boxes.push([(A.x - vx) / k - 10, (-A.y - vy) / k - 10, (A.x - vx) / k + 10, (-A.y - vy) / k + 10]);
     if (legs[i].lm) {
       const uin = unit(A.x - P.x, A.y - P.y), uout = unit(B.x - A.x, B.y - A.y);
@@ -1522,7 +1559,7 @@ function drawSketch() {
   // 9) 역
   for (const l of D.lms) if (l.k === 'station' && inView(l.x, l.y, -10)) {
     el('rect', { x: l.x - 7 * k, y: -l.y - 7 * k, width: 14 * k, height: 14 * k, rx: 3 * k, fill: 'var(--metro)' }, gMark);
-    const t = el('text', { x: l.x, y: -l.y, 'font-size': 9 * k, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff' }, gMark); t.textContent = '역';
+    const t = el('text', { x: l.x, y: -l.y, 'font-size': 9 * k * FS, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff' }, gMark); t.textContent = '역';
     label(l.x + 11 * k, l.y, l.n, { anchor: 'start', weight: 700, mid: true });
   }
   // 10) 길 이름 (보이는 구간이 200m 이상인 길 중 긴 순서로 12개까지, 길 방향으로 눕혀서)
@@ -1556,18 +1593,20 @@ function drawSketch() {
   const nice = [50, 100, 200, 250, 500, 1000].find(v => v / k >= 70) || 1000;
   const bx = vx + 18 * k, by = vy + H - 18 * k;
   el('path', { d: `M${bx},${by - 5 * k}V${by}H${bx + nice}V${by - 5 * k}`, stroke: 'var(--ink)', 'stroke-width': 1.5 * k, fill: 'none' }, svg);
-  const tsc = el('text', { x: bx + nice / 2, y: by - 8 * k, 'font-size': 11 * k, 'text-anchor': 'middle', fill: 'var(--ink)', 'font-family': 'var(--mono)' }, svg); tsc.textContent = nice >= 1000 ? nice / 1000 + 'km' : nice + 'm';
+  const tsc = el('text', { x: bx + nice / 2, y: by - 8 * k, 'font-size': 11 * k * FS, 'text-anchor': 'middle', fill: 'var(--ink)', 'font-family': 'var(--mono)' }, svg); tsc.textContent = nice >= 1000 ? nice / 1000 + 'km' : nice + 'm';
 }
 
 // ---------- 단계 안내 ----------
-function renderSteps() {
+function renderSteps() { renderStepsList(); renderRest(); }
+function renderStepsList() {
   const ol = $('stepList'); ol.innerHTML = '';
   const legs = state.legs;
   $('stepsTitle').textContent = state.sel === 'cool' ? '걷는 순서 · 그늘 우선 길' : '걷는 순서 · 가장 빠른 길';
   if (!legs) return;
   const li = (n, cls, t, d) => { const x = document.createElement('li'); x.innerHTML = `<span class="n ${cls}">${n}</span><div><div class="t">${t}</div>${d ? `<div class="d">${d}</div>` : ''}</div>`; ol.appendChild(x); };
   const legDesc = (l) => {
-    const parts = [`<b class="num">${fmtM(l.len)}</b> 걷기`];
+    const mn = l.len / WALK.speed / 60;
+    const parts = [`<b class="num">${fmtM(l.len)}</b> 걷기 (${mn < 0.75 ? '1분 이내' : '약 ' + Math.round(mn) + '분'})`];
     const sunPct = l.len > 0 ? l.sun / l.len : 0;
     parts.push(sunPct > 0.66 ? `<span class="sunchip">대부분 햇볕</span>` : sunPct < 0.34 ? `<span class="shadechip">대부분 그늘</span>` : `햇볕 ${Math.round(sunPct * 100)}%`);
     if (l.cross) parts.push(`횡단보도 ${l.cross}곳${l.sigCross ? ` (신호등 ${l.sigCross}곳${l.sigAssumed ? `, 그중 ${l.sigAssumed}곳은 신호등으로 가정` : ''})` : ''}`);
@@ -1583,6 +1622,64 @@ function renderSteps() {
   }
   li('도', 'e', `${state.nameE}${state.nameE !== state.E.name ? '로 들어가면' : ''} 도착`, state.sel === 'cool' && state.cool ? `총 ${fmtM(state.cool.len)} · 햇볕 ${state.cool.sunMin.toFixed(1)}분` : state.fast ? `총 ${fmtM(state.fast.len)} · 햇볕 ${state.fast.sunMin.toFixed(1)}분` : '');
 }
+
+// ---------- 가는 길에 쉬어갈 곳 (사용 후기 반영) ----------
+// 공식 무더위쉼터 목록은 구별 파일에 좌표가 없어 넣지 못했고, 지도(OSM)에 있는 냉방·그늘 장소를 씀
+const restKind = (l) => l.k === 'conv' ? '편의점' : l.k === 'cafe' ? '카페' : l.k === 'exit' ? '지하철역' : l.k === 'shelter' ? '정자·쉼터' :
+  (l.k === 'civic' || l.k === 'bldg') && /도서관|주민센터|행정복지센터|복지관|경로당|노인정|노인회관/.test(l.n) ? '공공시설' : null;
+const RGRID = new Map();
+for (const l of D.lms) if (restKind(l)) { const key = Math.floor(l.x / 100) * 100003 + Math.floor(l.y / 100); if (!RGRID.has(key)) RGRID.set(key, []); RGRID.get(key).push(l); }
+function restStops(U) {
+  const cand = new Map();
+  for (let d = 40; d <= U.total - 40; d += 10) {
+    const [x, y] = routeAt(U, d), gx = Math.floor(x / 100), gy = Math.floor(y / 100);
+    for (let i = gx - 1; i <= gx + 1; i++) for (let j = gy - 1; j <= gy + 1; j++) for (const l of RGRID.get(i * 100003 + j) || []) {
+      const off = Math.hypot(l.x - x, l.y - y); if (off > 40) continue;
+      const c = cand.get(l); if (!c || off < c.off) cand.set(l, { l, d, off });
+    }
+  }
+  const pr = (c) => (restKind(c.l) === '정자·쉼터' ? 1 : 0);   // 냉방 되는 실내를 먼저
+  const out = [];
+  for (const c of [...cand.values()].sort((a, b) => a.d - b.d)) {
+    const last = out[out.length - 1];
+    if (last && c.d - last.d < 150) { if (pr(c) < pr(last) || (pr(c) === pr(last) && c.off < last.off)) out[out.length - 1] = c; continue; }
+    out.push(c);
+  }
+  for (const c of out) {       // 이곳에 오기 직전까지 이어진 햇볕 구간 길이
+    let run = 0;
+    for (let i = U.pieces.length - 1; i >= 0; i--) { const p = U.pieces[i]; if (p.d0 >= c.d) continue; if (p.shade) break; run += Math.min(p.d1, c.d) - p.d0; }
+    c.sunMin = run / WALK.speed / 60; c.kind = restKind(c.l);
+  }
+  return out.slice(0, 12);
+}
+function renderRest() {
+  const box = $('restBox'), ul = $('restList'); ul.innerHTML = '';
+  const R = state.rests || []; box.hidden = !R.length; if (!R.length) return;
+  for (const c of R) {
+    const m = c.d / WALK.speed / 60, li = document.createElement('li');
+    li.innerHTML = `<span class="tm">${m < 1 ? '출발 직후' : '출발 ' + Math.round(m) + '분'}</span><span><b></b> <span class="kd"></span>${c.sunMin >= 2 ? `<span class="after">햇볕 ${Math.round(c.sunMin)}분 걸은 뒤</span>` : ''}</span>`;
+    li.querySelector('b').textContent = c.l.n; li.querySelector('.kd').textContent = `${c.kind} · 길에서 ${Math.round(c.off)}m`;
+    ul.appendChild(li);
+  }
+}
+// 약도 확대·이동 (사용 후기 반영: 작은 글씨·좁은 길을 크게 보기)
+$('skIn').onclick = () => skZoom(1.5);
+$('skOut').onclick = () => skZoom(1 / 1.5);
+$('skFit').onclick = () => { SK.z = 1; if (SK.base) { SK.cx = SK.base[0] + SK.base[2] / 2; SK.cy = SK.base[1] + SK.base[3] / 2; } skApply(); };
+(() => {
+  const svg = $('sketch'); let drag = null;
+  svg.addEventListener('pointerdown', (e) => { if (SK.z <= 1.01) return; drag = { x: e.clientX, y: e.clientY, cx: SK.cx, cy: SK.cy }; svg.setPointerCapture(e.pointerId); });
+  svg.addEventListener('pointermove', (e) => { if (!drag) return; const r = svg.getBoundingClientRect(), sc = SK.base[2] / SK.z / r.width; SK.cx = drag.cx - (e.clientX - drag.x) * sc; SK.cy = drag.cy - (e.clientY - drag.y) * sc; skApply(); });
+  const end = () => { drag = null; }; svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
+})();
+// 글씨 크게 (약도 글씨 1.35배, 안내 글씨 키움)
+function setBig(on) {
+  document.body.classList.toggle('big', on); $('btnBig').setAttribute('aria-pressed', String(on)); FS = on ? 1.35 : 1;
+  try { localStorage.setItem('shadeBig', on ? '1' : '0'); } catch (e) {}
+  if (state.U) { const z = SK.z, cx = SK.cx, cy = SK.cy; drawSketch(); SK.z = z; SK.cx = cx; SK.cy = cy; skApply(); }
+}
+$('btnBig').onclick = () => setBig(!document.body.classList.contains('big'));
+try { if (localStorage.getItem('shadeBig') === '1') setBig(true); } catch (e) {}
 
 // ---------- 실제 지도 (축척 그대로, SVG · 화면에 보이는 부분만 그림) ----------
 const view = { x: -900, y: -900, w: 1800, h: 1800 };     // 지도 좌표(m): X=동, Y=남(화면 아래)
